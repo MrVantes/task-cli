@@ -6,14 +6,17 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const jsonFile = "tasks.json"
 
 type Task struct {
-	ID          []int64  `json:"id"`
-	Description []string `json:"description"`
-	Status      []string `json:"status"`
+	ID          []int64     `json:"id"`
+	Description []string    `json:"description"`
+	Status      []string    `json:"status"`
+	CreatedAt   []time.Time `json:"created_at"`
+	UpdatedBy   []time.Time `json:"updated_by"`
 }
 
 func add(task string) {
@@ -47,6 +50,8 @@ func add(task string) {
 	data.Description = append(data.Description, task)
 	data.Status = append(data.Status, "not done")
 	data.ID = append(data.ID, lastID+1)
+	data.CreatedAt = append(data.CreatedAt, time.Now())
+	data.UpdatedBy = append(data.UpdatedBy, time.Now())
 
 	// Write the updated data back to the JSON file
 	writeToFile(data)
@@ -81,6 +86,57 @@ func update(id int64, task string) {
 			// Update the task at the found index
 			data.Description[idx] = task
 			data.Status[idx] = "not done"
+			data.UpdatedBy[idx] = time.Now()
+
+			// Mark that we found and updated the task
+			updated = true
+			fmt.Printf("Task updated successfully (ID: %d)\n ", id)
+
+			// Break the loop since the task is updated
+			break
+		}
+	}
+
+	// If the task was not found, notify the user
+	if !updated {
+		fmt.Println("Task with ID", id, "not found.")
+		return
+	}
+
+	// Write the updated data back to the file
+	writeToFile(data)
+}
+
+func updateStatus(id int64) {
+	fileTask, err := os.ReadFile(jsonFile)
+	if err != nil {
+		fmt.Println("Error reading the file:", err)
+		os.Exit(1)
+	}
+
+	// Parse the JSON data into a Data structure
+	var data Task
+	err = json.Unmarshal(fileTask, &data)
+	if err != nil {
+		fmt.Println("Error parsing the JSON:", err)
+		os.Exit(1)
+	}
+
+	// Find the ID for updating
+	updated := false
+	for idx, taskID := range data.ID {
+		if taskID == id {
+			// Update the task at the found index
+			switch os.Args[1] {
+			case "mark-done":
+				data.Status[idx] = "done"
+				data.UpdatedBy[idx] = time.Now()
+			case "mark-in-progress":
+				data.Status[idx] = "in-progress"
+				data.UpdatedBy[idx] = time.Now()
+			default:
+				data.Status[idx] = "not done"
+			}
 
 			// Mark that we found and updated the task
 			updated = true
@@ -125,6 +181,8 @@ func delete(id int64) {
 			data.ID = append(data.ID[:i], data.ID[i+1:]...)
 			data.Description = append(data.Description[:i], data.Description[i+1:]...)
 			data.Status = append(data.Status[:i], data.Status[i+1:]...)
+			data.CreatedAt = append(data.CreatedAt[:i], data.CreatedAt[i+1:]...)
+			data.UpdatedBy = append(data.UpdatedBy[:i], data.UpdatedBy[i+1:]...)
 
 			// Mark that we found and preapre to delete the task
 			deleted = true
@@ -151,6 +209,8 @@ func writeNewData(task string) {
 		ID:          []int64{1},
 		Description: []string{task},
 		Status:      []string{"not done"},
+		CreatedAt:   []time.Time{time.Now()},
+		UpdatedBy:   []time.Time{time.Now()},
 	}
 	writeToFile(data)
 }
@@ -213,6 +273,24 @@ func main() {
 		}
 		// Handle 'delete' command
 		delete(id)
+	case "mark-done":
+		// Set ID for updating
+		id, err := strconv.ParseInt(os.Args[2], 10, 64)
+		if err != nil {
+			fmt.Println("Error converting id to int64:", err)
+			os.Exit(1)
+		}
+		// Handle 'update' command
+		updateStatus(id)
+	case "mark-in-progress":
+		// Set ID for updating
+		id, err := strconv.ParseInt(os.Args[2], 10, 64)
+		if err != nil {
+			fmt.Println("Error converting id to int64:", err)
+			os.Exit(1)
+		}
+		// Handle 'update' command
+		updateStatus(id)
 	default:
 		fmt.Println("Unknown command:", command)
 		os.Exit(1)
