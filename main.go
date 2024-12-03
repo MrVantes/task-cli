@@ -16,7 +16,7 @@ type Task struct {
 	Description []string    `json:"description"`
 	Status      []string    `json:"status"`
 	CreatedAt   []time.Time `json:"created_at"`
-	UpdatedBy   []time.Time `json:"updated_by"`
+	UpdatedAt   []time.Time `json:"updated_at"`
 }
 
 func add(task string) {
@@ -51,11 +51,47 @@ func add(task string) {
 	data.Status = append(data.Status, "not done")
 	data.ID = append(data.ID, lastID+1)
 	data.CreatedAt = append(data.CreatedAt, time.Now())
-	data.UpdatedBy = append(data.UpdatedBy, time.Now())
+	data.UpdatedAt = append(data.UpdatedAt, time.Now())
 
 	// Write the updated data back to the JSON file
 	writeToFile(data)
 	fmt.Printf("Task added successfully (ID: %d)\n ", data.ID[len(data.ID)-1])
+}
+
+func list() {
+	fileTask, err := os.ReadFile(jsonFile)
+	if err != nil {
+		fmt.Println("Error reading the file:", err)
+		os.Exit(1)
+	}
+
+	// Parse the JSON data into a Data structure
+	var data Task
+	err = json.Unmarshal(fileTask, &data)
+	if err != nil {
+		fmt.Println("Error parsing the JSON:", err)
+		os.Exit(1)
+	}
+
+	// Iterate through each task and print in the desired format
+	for i := 0; i < len(data.ID); i++ {
+		var status string
+		// Set status based on the task's progress
+		switch data.Status[i] {
+		case "done":
+			status = "✔"
+		case "not done":
+			status = "✘"
+		case "in-progress":
+			status = "▶"
+		}
+		// Format output with clear spacing and alignment
+		fmt.Printf(" %d) %-30s [%s]\n",
+			data.ID[i],
+			data.Description[i],
+			status)
+	}
+
 }
 
 func update(id int64, task string) {
@@ -86,7 +122,7 @@ func update(id int64, task string) {
 			// Update the task at the found index
 			data.Description[idx] = task
 			data.Status[idx] = "not done"
-			data.UpdatedBy[idx] = time.Now()
+			data.UpdatedAt[idx] = time.Now()
 
 			// Mark that we found and updated the task
 			updated = true
@@ -130,10 +166,10 @@ func updateStatus(id int64) {
 			switch os.Args[1] {
 			case "mark-done":
 				data.Status[idx] = "done"
-				data.UpdatedBy[idx] = time.Now()
+				data.UpdatedAt[idx] = time.Now()
 			case "mark-in-progress":
 				data.Status[idx] = "in-progress"
-				data.UpdatedBy[idx] = time.Now()
+				data.UpdatedAt[idx] = time.Now()
 			default:
 				data.Status[idx] = "not done"
 			}
@@ -182,7 +218,7 @@ func delete(id int64) {
 			data.Description = append(data.Description[:i], data.Description[i+1:]...)
 			data.Status = append(data.Status[:i], data.Status[i+1:]...)
 			data.CreatedAt = append(data.CreatedAt[:i], data.CreatedAt[i+1:]...)
-			data.UpdatedBy = append(data.UpdatedBy[:i], data.UpdatedBy[i+1:]...)
+			data.UpdatedAt = append(data.UpdatedAt[:i], data.UpdatedAt[i+1:]...)
 
 			// Mark that we found and preapre to delete the task
 			deleted = true
@@ -210,7 +246,7 @@ func writeNewData(task string) {
 		Description: []string{task},
 		Status:      []string{"not done"},
 		CreatedAt:   []time.Time{time.Now()},
-		UpdatedBy:   []time.Time{time.Now()},
+		UpdatedAt:   []time.Time{time.Now()},
 	}
 	writeToFile(data)
 }
@@ -252,7 +288,7 @@ func main() {
 		add(task)
 	case "list":
 		// Handle 'list' command
-
+		list()
 	case "update":
 		// Set ID for updating
 		id, err := strconv.ParseInt(os.Args[2], 10, 64)
