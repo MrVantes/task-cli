@@ -1,7 +1,6 @@
 {
   "id": [
     1,
-    2,
     3,
     4,
     5,
@@ -12,13 +11,11 @@
     10,
     11,
     12,
-    13,
-    14
+    13
   ],
   "description": [
     "Second task",
     "econd task",
-    "econd task",
     "Second task",
     "Second task",
     "Second task",
@@ -28,12 +25,9 @@
     "Second task",
     "Second task",
     "Second task",
-    "Second task",
-    "second"
+    "Second task"
   ],
   "status": [
-    "not done",
-    "not done",
     "not done",
     "not done",
     "not done",

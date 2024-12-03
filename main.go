@@ -73,6 +73,7 @@ func update(id int64, task string) {
 		fmt.Println("Error parsing the JSON:", err)
 		os.Exit(1)
 	}
+
 	// Find the ID for updating
 	updated := false
 	for idx, taskID := range data.ID {
@@ -98,7 +99,50 @@ func update(id int64, task string) {
 
 	// Write the updated data back to the file
 	writeToFile(data)
+}
 
+func delete(id int64) {
+	// Read json file
+	fileTask, err := os.ReadFile(jsonFile)
+	if err != nil {
+		fmt.Println("Error reading the file:", err)
+		os.Exit(1)
+	}
+
+	// Parse the JSON data into a Data structure
+	var data Task
+	err = json.Unmarshal(fileTask, &data)
+	if err != nil {
+		fmt.Println("Error parsing the JSON:", err)
+		os.Exit(1)
+	}
+
+	// Find the ID for deleting
+	deleted := false
+	for i, taskID := range data.ID {
+		if taskID == id {
+			// Remove the task by index
+			data.ID = append(data.ID[:i], data.ID[i+1:]...)
+			data.Description = append(data.Description[:i], data.Description[i+1:]...)
+			data.Status = append(data.Status[:i], data.Status[i+1:]...)
+
+			// Mark that we found and preapre to delete the task
+			deleted = true
+			fmt.Printf("Task deleted successfully (ID: %d)\n ", id)
+
+			// Break the loop since the task is delete
+			break
+		}
+	}
+
+	// If the task was not found, notify the user
+	if !deleted {
+		fmt.Println("Task with ID", id, "not found.")
+		return
+	}
+
+	// Write the updated data back to the file
+	writeToFile(data)
 }
 
 // Function to write new data to the file when the file doesn't exist
@@ -161,8 +205,14 @@ func main() {
 		// Handle 'update' command
 		update(id, task)
 	case "delete":
+		// Set ID for updating
+		id, err := strconv.ParseInt(os.Args[2], 10, 64)
+		if err != nil {
+			fmt.Println("Error converting id to int64:", err)
+			os.Exit(1)
+		}
 		// Handle 'delete' command
-
+		delete(id)
 	default:
 		fmt.Println("Unknown command:", command)
 		os.Exit(1)
