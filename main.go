@@ -59,6 +59,7 @@ func add(task string) {
 }
 
 func list() {
+	// Read the tasks from the file
 	fileTask, err := os.ReadFile(jsonFile)
 	if err != nil {
 		fmt.Println("Error reading the file:", err)
@@ -66,32 +67,76 @@ func list() {
 	}
 
 	// Parse the JSON data into a Data structure
-	var data Task
+	var data []Task
 	err = json.Unmarshal(fileTask, &data)
 	if err != nil {
 		fmt.Println("Error parsing the JSON:", err)
 		os.Exit(1)
 	}
 
-	// Iterate through each task and print in the desired format
-	for i := 0; i < len(data.ID); i++ {
-		var status string
-		// Set status based on the task's progress
-		switch data.Status[i] {
+	// Declare a slice to hold the filtered tasks (or all tasks)
+	var tasks []Task
+
+	// If no argument is passed for the filter, show all tasks
+	if len(os.Args) < 3 || os.Args[2] == "" {
+		fmt.Println("No filter provided, showing all tasks.")
+		tasks = data // If no filter is provided, just show all tasks
+	} else {
+		// Filtering based on command line arguments
+		switch os.Args[2] {
 		case "done":
-			status = "✔"
-		case "not done":
-			status = "✘"
+			// Filter tasks with "done" status
+			for _, task := range data {
+				if contains(task.Status, "done") {
+					tasks = append(tasks, task) // Reassign result of append
+				}
+			}
+		case "todo":
+			// Filter tasks with "not done" status
+			for _, task := range data {
+				if contains(task.Status, "not done") {
+					tasks = append(tasks, task) // Reassign result of append
+				}
+			}
 		case "in-progress":
-			status = "▶"
+			// Filter tasks with "in-progress" status
+			for _, task := range data {
+				if contains(task.Status, "in-progress") {
+					tasks = append(tasks, task) // Reassign result of append
+				}
+			}
+		default:
+			fmt.Println("Invalid status filter. Please use: done, todo, or in-progress.")
+			os.Exit(1)
 		}
-		// Format output with clear spacing and alignment
-		fmt.Printf(" %d) %-30s [%s]\n",
-			data.ID[i],
-			data.Description[i],
-			status)
 	}
 
+	// Iterate through the filtered tasks and print them
+	for _, task := range tasks {
+		var status string
+		// Set status based on the task's progress
+		switch {
+		case contains(task.Status, "done"):
+			status = "✔"
+		case contains(task.Status, "not done"):
+			status = "✘"
+		case contains(task.Status, "in-progress"):
+			status = "▶"
+		}
+
+		// Format output with clear spacing and alignment
+		fmt.Printf(" %d) %-30s [%s]\n", task.ID, task.Description, status)
+	}
+}
+
+// Helper function to check if a slice contains a specific string
+func contains(slice []string, str string) bool {
+	for _, v := range slice {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
 
 func update(id int64, task string) {
