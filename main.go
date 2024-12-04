@@ -174,7 +174,7 @@ func updateStatus(index int) {
 		os.Exit(1)
 	}
 
-	if index < 0 || index >= len(data.ID) {
+	if index-1 < 0 || index-1 >= len(data.ID) {
 		fmt.Println("Invalid index:", index)
 		return
 	}
