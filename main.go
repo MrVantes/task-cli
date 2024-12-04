@@ -191,13 +191,18 @@ func updateStatus(index int) {
 	fmt.Printf("Task updated (Index: %d)\n", index)
 }
 
-func delete(id int64) {
+func delete(index int) {
+	// Adjust for 1-based indexing if necessary
+	zeroBasedIndex := index - 1
+
+	// Read file data
 	fileTask, err := os.ReadFile(jsonFile)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
+	// Unmarshal file data into a struct
 	var data TaskData
 	err = json.Unmarshal(fileTask, &data)
 	if err != nil {
@@ -205,26 +210,24 @@ func delete(id int64) {
 		os.Exit(1)
 	}
 
-	deleted := false
-	for i, taskID := range data.ID {
-		if taskID == id {
-			data.ID = append(data.ID[:i], data.ID[i+1:]...)
-			data.Description = append(data.Description[:i], data.Description[i+1:]...)
-			data.Status = append(data.Status[:i], data.Status[i+1:]...)
-			data.CreatedAt = append(data.CreatedAt[:i], data.CreatedAt[i+1:]...)
-			data.UpdatedAt = append(data.UpdatedAt[:i], data.UpdatedAt[i+1:]...)
-			deleted = true
-			fmt.Printf("Task deleted (ID: %d)\n", id)
-			break
-		}
-	}
-
-	if !deleted {
-		fmt.Println("Task not found.")
+	// Check if the adjusted index is valid (0-based index)
+	if zeroBasedIndex < 0 || zeroBasedIndex >= len(data.ID) {
+		fmt.Println("Invalid index:", index)
 		return
 	}
 
+	// Perform deletion based on the adjusted index
+	data.ID = append(data.ID[:zeroBasedIndex], data.ID[zeroBasedIndex+1:]...)
+	data.Description = append(data.Description[:zeroBasedIndex], data.Description[zeroBasedIndex+1:]...)
+	data.Status = append(data.Status[:zeroBasedIndex], data.Status[zeroBasedIndex+1:]...)
+	data.CreatedAt = append(data.CreatedAt[:zeroBasedIndex], data.CreatedAt[zeroBasedIndex+1:]...)
+	data.UpdatedAt = append(data.UpdatedAt[:zeroBasedIndex], data.UpdatedAt[zeroBasedIndex+1:]...)
+
+	// Write the updated data back to the file
 	writeToFile(data)
+
+	// Print confirmation message
+	fmt.Printf("Task deleted (Index: %d)\n", index)
 }
 
 func writeNewData(task string) {
@@ -275,12 +278,12 @@ func main() {
 		task := strings.Join(os.Args[3:], " ")
 		update(index, task)
 	case "delete":
-		id, err := strconv.ParseInt(os.Args[2], 10, 64)
+		index, err := strconv.Atoi(os.Args[2])
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		}
-		delete(id)
+		delete(index)
 	case "mark-done":
 		index, err := strconv.Atoi(os.Args[2])
 		if err != nil {
