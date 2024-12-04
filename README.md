@@ -69,18 +69,18 @@ task-cli add <task_description>
 Example:
 
 ```bash
-task-cli add "Buy groceries"
+task-cli add Buy groceries
 ```
 
 Output:
 
 ```
-Task added successfully (ID: 1)
+Task added successfully (Index: 1)
 ```
 
 ### Updating a Task
 
-To update an existing task (using its ID), run:
+To update an existing task (using its Index), run:
 
 ```bash
 task-cli update <index> <new_task_description>
@@ -89,12 +89,12 @@ task-cli update <index> <new_task_description>
 Example:
 
 ```bash
-task-cli update 1 "Buy groceries and cook dinner"
+task-cli update 1 Buy groceries and cook dinner
 ```
 
 ### Deleting a Task
 
-To delete a task by ID:
+To delete a task by Index:
 
 ```bash
 task-cli delete <index>
