@@ -2,8 +2,6 @@
 
 A simple command-line tool built in Golang to track your tasks efficiently. 
 
-https://roadmap.sh/projects/task-tracker
-
 https://roadmap.sh/projects/task-tracker/solutions?u=64c9f625c3203c8793246c7f
 
 ## Installation
