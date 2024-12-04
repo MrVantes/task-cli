@@ -83,7 +83,7 @@ Task added successfully (ID: 1)
 To update an existing task (using its ID), run:
 
 ```bash
-task-cli update <task_id> <new_task_description>
+task-cli update <index> <new_task_description>
 ```
 
 Example:
@@ -97,7 +97,7 @@ task-cli update 1 "Buy groceries and cook dinner"
 To delete a task by ID:
 
 ```bash
-task-cli delete <task_id>
+task-cli delete <index>
 ```
 
 Example:
@@ -111,13 +111,13 @@ task-cli delete 1
 To mark a task as in progress:
 
 ```bash
-task-cli mark-in-progress <task_id>
+task-cli mark-in-progress <index>
 ```
 
 To mark a task as done:
 
 ```bash
-task-cli mark-done <task_id>
+task-cli mark-done <index>
 ```
 
 ### Listing Tasks
