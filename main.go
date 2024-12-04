@@ -180,7 +180,7 @@ func updateStatus(index int) {
 	}
 
 	switch os.Args[1] {
-	case "done":
+	case "mark-done":
 		data.Status[index-1] = "done"
 	case "mark-in-progress":
 		data.Status[index-1] = "in-progress"
