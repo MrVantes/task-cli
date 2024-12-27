@@ -154,7 +154,3 @@ You can filter tasks by status:
 ## Contributing
 
 Feel free to fork the repository, submit issues, or create pull requests. Contributions are welcome!
-
----
-
-Let me know if you'd like to add or modify anything else!
